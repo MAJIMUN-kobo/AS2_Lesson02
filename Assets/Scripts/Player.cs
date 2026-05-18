@@ -18,7 +18,8 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        float zSpeed = 5 * Time.deltaTime;
+        transform.Translate(0, 0, zSpeed);
     }
 
     // PlayerInputから[Move]アクションを呼び出すメソッド
@@ -65,7 +66,10 @@ public class Player : MonoBehaviour
         rb.AddForce(bullet.transform.forward * 25, ForceMode.Impulse);
 
         // 効果音を再生する
-        audioSource.PlayOneShot(nShotSe);
+        if(nShotSe != null)
+        {
+            audioSource?.PlayOneShot(nShotSe);
+        }
 
         // 5秒後に弾丸を破壊する
         Destroy(bullet, 5f);
