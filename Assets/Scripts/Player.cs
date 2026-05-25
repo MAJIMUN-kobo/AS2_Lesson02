@@ -9,6 +9,19 @@ public class Player : MonoBehaviour
     public AudioSource audioSource;     // AudioSourceコンポーネント
     public AudioClip nShotSe;           // 効果音ファイル
 
+    // 移動値の設定
+    [Header("* * * 移動値の設定")]
+    public float moveSpeed = 5.0f;      // 移動速度
+    private Vector3 inputMoveVelocity;  // 移動ベクトルの入力値
+
+    // 回転軸の設定
+    [Header("* * * 回転軸の設定")]
+    public bool tiltInvart = false; // 向きのチルト（上下）反転フラグ
+    public GameObject lookAxis;     // 向きベクトル軸（オブジェクト）
+    public GameObject gyroAxis;     // ジャイロ軸（オブジェクト）
+    private Vector3 lookAngles;     // 向きベクトル（値）
+    private float gyroAngle;        // ジャイロ回転（値）
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -18,8 +31,49 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float zSpeed = 5 * Time.deltaTime;
+        float zSpeed = moveSpeed * Time.deltaTime;
         transform.Translate(0, 0, zSpeed);
+
+        // 移動する方向に回転させる
+        lookAngles.x += inputMoveVelocity.y * (tiltInvart ? -1 : 1);
+        lookAngles.y += inputMoveVelocity.x;
+        gyroAngle += inputMoveVelocity.x * -1;
+        /* --- おまけポイント
+         * 三項演算子[ 条件式 ? true : false ]
+         * -- これと同じ -------------
+         * if(tiletInvert)
+         *      return -1;
+         * else
+         *      return 1;
+         * ---------------------------
+         */
+
+        // 徐々に 0(目標値) に近づける
+        lookAngles = Vector3.Lerp(lookAngles, Vector3.zero, Time.deltaTime * 3);
+        gyroAngle = Mathf.Lerp(gyroAngle, 0, Time.deltaTime * 3);
+        /* -----
+         * 各軸に分けても OK
+         * ----- */
+        //lookAngles.x = Mathf.Lerp(lookAngles.x, 0, Time.deltaTime);
+        //lookAngles.y = Mathf.Lerp(lookAngles.y, 0, Time.deltaTime);
+
+        // 回転の制限
+        // 👇[Mathf.Clamp(制限対象値, 最小値, 最大値);]
+        lookAngles.x = Mathf.Clamp(lookAngles.x, -15, 15);
+        lookAngles.y = Mathf.Clamp(lookAngles.y, -15, 15);
+        gyroAngle = Mathf.Clamp(gyroAngle, -15, 15);
+
+        // 角度の代入
+        // [Transform.eulerAngles]で角度の変更ができる
+        lookAxis.transform.eulerAngles = lookAngles;
+        gyroAxis.transform.eulerAngles = new Vector3(0, 0, gyroAngle);
+
+        /* これでもいい
+        if(lookAngles.x <= -15)
+        {
+            lookAngles.x = -15;
+        }
+        */
     }
 
     // PlayerInputから[Move]アクションを呼び出すメソッド
@@ -50,6 +104,9 @@ public class Player : MonoBehaviour
 
         // プレイヤーを移動させる
         transform.Translate(move);
+
+        // 移動値を変数に保存
+        inputMoveVelocity = move;
     }
 
     // PlayerInputから[Attack]アクションを呼び出すメソッド
