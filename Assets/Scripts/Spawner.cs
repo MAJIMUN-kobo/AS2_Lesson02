@@ -32,6 +32,7 @@ public class Spawner : MonoBehaviour
 
         Vector3 randomPos = Vector3.zero;
         randomPos.x = Random.Range(-8, 8);   // X軸のランダムな位置
+        randomPos.y = Random.Range(-8, 8);   // Y軸のランダムな位置
         randomPos.z = playerZ + 100;         // プレイヤーの前方に生成
         Instantiate(spawnPrefab, randomPos, transform.rotation);
     }

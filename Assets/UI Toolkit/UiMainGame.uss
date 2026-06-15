@@ -1,0 +1,33 @@
+:root {
+	
+}
+
+.unity-label {
+	opacity: 1;
+	color: black;
+}
+
+/*[ #要素名 ]でデザインを作る*/
+#root-container {
+	flex-direction: row;	/*並び順[row: 横]*/
+}
+
+/* クラス名での参照 */
+.score-container {
+	opacity: 1;				/*透明度*/
+	background-color: red;
+}
+
+/* 色を変えるクラス名 */
+.green {
+	background-color: green;
+}
+
+#option-container {
+	flex-direction: row-reverse;
+}
+
+#game-quit-button {
+	width: 100px;
+	height: 100px;
+}

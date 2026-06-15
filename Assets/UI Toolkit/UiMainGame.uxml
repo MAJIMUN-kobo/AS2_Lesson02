@@ -1,0 +1,11 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/UiMainGame.uss?fileID=7433441132597879392&amp;guid=1dd6f46c5bc6f73429d5e8f4ad55cba0&amp;type=3#UiMainGame"/>
+    <ui:VisualElement name="root-container" style="flex-grow: 1;">
+        <ui:VisualElement name="score-container" style="flex-grow: 1;">
+            <ui:Label text="Score: ------" name="score-label"/>
+        </ui:VisualElement>
+        <ui:VisualElement name="option-container" style="flex-grow: 1;">
+            <ui:Button text="終了" name="game-quit-button"/>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

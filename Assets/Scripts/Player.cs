@@ -13,6 +13,7 @@ public class Player : MonoBehaviour
     [Header("* * * 移動値の設定")]
     public float moveSpeed = 5.0f;      // 移動速度
     private Vector3 inputMoveVelocity;  // 移動ベクトルの入力値
+    private Vector3 moveVelocity;
 
     // 回転軸の設定
     [Header("* * * 回転軸の設定")]
@@ -22,17 +23,15 @@ public class Player : MonoBehaviour
     private Vector3 lookAngles;     // 向きベクトル（値）
     private float gyroAngle;        // ジャイロ回転（値）
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Awake()
     {
-        
+        Application.targetFrameRate = 60;
     }
 
     // Update is called once per frame
     void Update()
     {
         float zSpeed = moveSpeed * Time.deltaTime;
-        transform.Translate(0, 0, zSpeed);
 
         // 移動する方向に回転させる
         lookAngles.x += inputMoveVelocity.y * (tiltInvart ? -1 : 1);
@@ -48,9 +47,6 @@ public class Player : MonoBehaviour
          * ---------------------------
          */
 
-        // 徐々に 0(目標値) に近づける
-        lookAngles = Vector3.Lerp(lookAngles, Vector3.zero, Time.deltaTime * 3);
-        gyroAngle = Mathf.Lerp(gyroAngle, 0, Time.deltaTime * 3);
         /* -----
          * 各軸に分けても OK
          * ----- */
@@ -59,21 +55,31 @@ public class Player : MonoBehaviour
 
         // 回転の制限
         // 👇[Mathf.Clamp(制限対象値, 最小値, 最大値);]
-        lookAngles.x = Mathf.Clamp(lookAngles.x, -15, 15);
-        lookAngles.y = Mathf.Clamp(lookAngles.y, -15, 15);
+        //lookAngles.x = Mathf.Clamp(lookAngles.x, -15, 15);
+        //lookAngles.y = Mathf.Clamp(lookAngles.y, -15, 15);
         gyroAngle = Mathf.Clamp(gyroAngle, -15, 15);
 
         // 角度の代入
         // [Transform.eulerAngles]で角度の変更ができる
-        lookAxis.transform.eulerAngles = lookAngles;
+        lookAxis.transform.localEulerAngles = new Vector3(inputMoveVelocity.y, inputMoveVelocity.x);
         gyroAxis.transform.eulerAngles = new Vector3(0, 0, gyroAngle);
 
-        /* これでもいい
-        if(lookAngles.x <= -15)
+        if (inputMoveVelocity.magnitude <= 0.1f)
         {
-            lookAngles.x = -15;
+            // 徐々に 0(目標値) に近づける
+            //lookAngles = Vector3.Lerp(lookAngles, Vector3.zero, Time.deltaTime * 3);
+            gyroAngle = Mathf.Lerp(gyroAngle, 0, Time.deltaTime * 3);
         }
-        */
+
+        moveVelocity = (inputMoveVelocity * 5 + lookAxis.transform.forward * 5.0f) * Time.deltaTime;
+    }
+
+    public void FixedUpdate()
+    {
+        GetComponent<Rigidbody>().linearVelocity = Vector3.zero;
+        GetComponent<Rigidbody>() .angularVelocity = Vector3.zero;
+        transform.position += moveVelocity;
+        transform.eulerAngles = lookAngles;
     }
 
     // PlayerInputから[Move]アクションを呼び出すメソッド
@@ -88,6 +94,7 @@ public class Player : MonoBehaviour
             value.Get<Vector2>().y,
             0 );
 
+        /*
         // X軸の移動量を制限
         if (transform.position.x + value.Get<Vector2>().x < -8
             || transform.position.x + value.Get<Vector2>().x > 8)
@@ -104,6 +111,7 @@ public class Player : MonoBehaviour
 
         // プレイヤーを移動させる
         transform.Translate(move);
+        */
 
         // 移動値を変数に保存
         inputMoveVelocity = move;
@@ -116,11 +124,11 @@ public class Player : MonoBehaviour
         Debug.Log($"攻撃アクション [{ value.Get<float>() }]");
 
         // 弾丸を生成する
-        GameObject bullet = Instantiate(bulletPrefab, shotPoint.transform.position, transform.rotation);
+        GameObject bullet = Instantiate(bulletPrefab, shotPoint.transform.position, Quaternion.identity);
         
         // 弾丸に力を加える
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
-        rb.AddForce(bullet.transform.forward * 25, ForceMode.Impulse);
+        rb.AddForce(shotPoint.transform.forward * 25f, ForceMode.Impulse);
 
         // 効果音を再生する
         if(nShotSe != null)
@@ -131,4 +139,6 @@ public class Player : MonoBehaviour
         // 5秒後に弾丸を破壊する
         Destroy(bullet, 5f);
     }
+
+
 }
