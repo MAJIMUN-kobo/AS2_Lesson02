@@ -23,6 +23,12 @@ public class Player : MonoBehaviour
     private Vector3 lookAngles;     // 向きベクトル（値）
     private float gyroAngle;        // ジャイロ回転（値）
 
+    // バリアの設定
+    [Header("* * * バリアの設定")]
+    public GameObject barrire;          // バリアオブジェクトの参照
+    public MeshRenderer barrireRenderer;// バリアのレンダラー参照
+    public bool barrireActivation;      // バリアのフラグ
+
     private void Awake()
     {
         Application.targetFrameRate = 60;
@@ -140,5 +146,19 @@ public class Player : MonoBehaviour
         Destroy(bullet, 5f);
     }
 
+    void OnTriggerEnter(Collider collision)
+    {
+        // バリアアイテムと衝突
+        if(collision.transform.tag.Equals("Item/Barrire"))
+        {
+            // バリアのマテリアルを取得
+            Material m = barrireRenderer.material;
 
+            // バリアをアクティブにする
+            barrireActivation = true;
+
+            // 見た目を表示
+            m.SetInt("_IsActive", 1);
+        }
+    }
 }
