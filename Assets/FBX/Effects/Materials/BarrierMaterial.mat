@@ -109,6 +109,7 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0
     - _GlossyReflections: 1
+    - _IsActive: 0
     - _Metallic: 0
     - _Metaric: 0
     - _Mode: 0
