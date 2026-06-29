@@ -29,6 +29,10 @@ public class Player : MonoBehaviour
     public MeshRenderer barrireRenderer;// バリアのレンダラー参照
     public bool barrireActivation;      // バリアのフラグ
 
+    [Header("* * * エフェクトの設定")]
+    public BaseParticle muzzleFlash;    // マズルフラッシュのパーティクル
+    public float muzzleFlashLifeTime;   // マズルフラッシュの生存時間
+
     private void Awake()
     {
         Application.targetFrameRate = 60;
@@ -67,8 +71,8 @@ public class Player : MonoBehaviour
 
         // 角度の代入
         // [Transform.eulerAngles]で角度の変更ができる
-        lookAxis.transform.localEulerAngles = new Vector3(inputMoveVelocity.y, inputMoveVelocity.x);
-        gyroAxis.transform.eulerAngles = new Vector3(0, 0, gyroAngle);
+        transform.eulerAngles = new Vector3(lookAngles.x, lookAngles.y);
+        gyroAxis.transform.localEulerAngles = new Vector3(0, 0, gyroAngle);
 
         if (inputMoveVelocity.magnitude <= 0.1f)
         {
@@ -130,11 +134,14 @@ public class Player : MonoBehaviour
         Debug.Log($"攻撃アクション [{ value.Get<float>() }]");
 
         // 弾丸を生成する
-        GameObject bullet = Instantiate(bulletPrefab, shotPoint.transform.position, Quaternion.identity);
+        GameObject bullet = Instantiate(bulletPrefab, shotPoint.transform.position, transform.rotation);
         
         // 弾丸に力を加える
         Rigidbody rb = bullet.GetComponent<Rigidbody>();
         rb.AddForce(shotPoint.transform.forward * 25f, ForceMode.Impulse);
+
+        // === エフェクトを生成する
+        MuzzleFlash();
 
         // 効果音を再生する
         if(nShotSe != null)
@@ -144,6 +151,20 @@ public class Player : MonoBehaviour
 
         // 5秒後に弾丸を破壊する
         Destroy(bullet, 5f);
+    }
+
+    // === フラッシュ生成メソッド === //
+    public void MuzzleFlash()
+    {
+        try
+        {
+            BaseParticle flash = Instantiate(muzzleFlash, shotPoint.transform.position, Quaternion.identity);
+            flash.Initialize();
+        }
+        catch(System.Exception e)
+        {
+            Debug.LogError($"エフェクトの生成に失敗しました。{e}");
+        }
     }
 
     void OnTriggerEnter(Collider collision)
